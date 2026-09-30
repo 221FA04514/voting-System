@@ -14,6 +14,7 @@ import Settings from './pages/mentor/Settings';
 // Student Pages
 import StudentVote from './pages/student/StudentVote';
 import VoteSuccess from './pages/student/VoteSuccess';
+import NumberGuessGame from './pages/student/NumberGuessGame';
 
 function ProtectedMentorRoute({ children }) {
   const { mentor, loading } = useAuth();
@@ -69,9 +70,10 @@ function AppContent() {
             </ProtectedMentorRoute>
           } />
 
-          {/* Student Voting Routes */}
+          {/* Student Routes */}
           <Route path="/vote/:slug" element={<StudentVote />} />
           <Route path="/vote/:slug/success" element={<VoteSuccess />} />
+          <Route path="/game/number-guessing" element={<NumberGuessGame />} />
 
           {/* Fallback Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

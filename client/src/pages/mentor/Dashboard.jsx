@@ -19,7 +19,9 @@ import {
   Copy as DuplicateIcon, 
   ExternalLink, 
   Search,
-  Eye
+  Eye,
+  Gamepad2,
+  Share2
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -92,6 +94,12 @@ export default function Dashboard() {
     setTimeout(() => setCopiedSlug(null), 2500);
   };
 
+  const copyGameLink = () => {
+    const gameUrl = `${window.location.origin}/game/number-guessing`;
+    navigator.clipboard.writeText(gameUrl);
+    setToast({ message: 'Number Guessing Game link copied to clipboard!', type: 'success' });
+  };
+
   // Metrics
   const activeSessionsCount = sessions.filter(s => s.status === 'open').length;
   const closedSessionsCount = sessions.filter(s => s.status === 'closed').length;
@@ -122,11 +130,39 @@ export default function Dashboard() {
       </div>
 
       {/* Overview Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
         <StatCard title="Active Sessions" value={activeSessionsCount} subtitle="Currently accepting votes" icon={Layers} color="#10b981" />
         <StatCard title="Closed Sessions" value={closedSessionsCount} subtitle="Completed voting rounds" icon={CheckCircle} color="#64748b" />
         <StatCard title="Total Students" value={totalEligible} subtitle="Eligible across sessions" icon={Users} color="#4f46e5" />
         <StatCard title="Total Votes Cast" value={totalVotesCast} subtitle="Submitted image votes" icon={Vote} color="#f59e0b" />
+      </div>
+
+      {/* Student Activity & Game Share Section */}
+      <div className="card" style={{ padding: '1.25rem 1.5rem', marginBottom: '2.5rem', background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)', border: '1px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '280px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}>
+            <Gamepad2 size={26} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              Student Activity: 1–100 Number Guessing Game
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.2rem' }}>
+              Interactive icebreaker game for students. Share the link anytime without database setup!
+            </p>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button onClick={copyGameLink} className="btn btn-secondary" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem' }}>
+            <Share2 size={16} />
+            <span>Copy Game Link</span>
+          </button>
+          <a href={`${window.location.origin}/game/number-guessing`} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: '#ffffff' }}>
+            <ExternalLink size={16} />
+            <span>Preview Game</span>
+          </a>
+        </div>
       </div>
 
       {/* Session Filter Bar */}
