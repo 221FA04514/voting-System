@@ -8,7 +8,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isStudentPage = location.pathname.startsWith('/vote/') || location.pathname.startsWith('/game/');
+  const isStudentPage = location.pathname.startsWith('/vote/') || location.pathname.startsWith('/game/') || location.pathname.startsWith('/student/');
 
   return (
     <header

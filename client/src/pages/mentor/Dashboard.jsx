@@ -21,7 +21,8 @@ import {
   Search,
   Eye,
   Gamepad2,
-  Share2
+  Share2,
+  Code2
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -100,6 +101,12 @@ export default function Dashboard() {
     setToast({ message: 'Number Guessing Game link copied to clipboard!', type: 'success' });
   };
 
+  const copyPatternArenaLink = () => {
+    const arenaUrl = `${window.location.origin}/student/pattern-arena`;
+    navigator.clipboard.writeText(arenaUrl);
+    setToast({ message: 'Pattern Arena link copied to clipboard!', type: 'success' });
+  };
+
   // Metrics
   const activeSessionsCount = sessions.filter(s => s.status === 'open').length;
   const closedSessionsCount = sessions.filter(s => s.status === 'closed').length;
@@ -161,6 +168,34 @@ export default function Dashboard() {
           <a href={`${window.location.origin}/game/number-guessing`} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: '#ffffff' }}>
             <ExternalLink size={16} />
             <span>Preview Game</span>
+          </a>
+        </div>
+      </div>
+
+      {/* Pattern Arena Student Module Card */}
+      <div className="card" style={{ padding: '1.25rem 1.5rem', marginBottom: '2.5rem', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)', color: '#ffffff', border: '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '280px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(6, 182, 212, 0.3)' }}>
+            <Code2 size={26} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              🎮 PATTERN ARENA — Interactive C Pattern Simulator
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.2rem' }}>
+              Teach B.Tech first-years C nested loops visually (Rows vs Columns). Features Step Visualizer, Predict & Bug modes!
+            </p>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button onClick={copyPatternArenaLink} className="btn btn-primary" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: '#4f46e5' }}>
+            <Share2 size={16} />
+            <span>Copy Arena Link</span>
+          </button>
+          <a href={`${window.location.origin}/student/pattern-arena`} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: 'rgba(255,255,255,0.1)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <ExternalLink size={16} />
+            <span>Open Pattern Arena</span>
           </a>
         </div>
       </div>
