@@ -7,12 +7,17 @@ async function migrate() {
   console.log('📦 Running PostgreSQL schema migrations...');
 
   try {
-    const migrationSqlPath = path.join(__dirname, 'migrations', '001_init_schema.sql');
-    const sql = fs.readFileSync(migrationSqlPath, 'utf-8');
+    const migrationsDir = path.join(__dirname, 'migrations');
+    const migrationFiles = fs.readdirSync(migrationsDir)
+      .filter(f => f.endsWith('.sql'))
+      .sort();
 
-    // Run Migration Schema SQL
-    await query(sql);
-    console.log('✅ Migration 001_init_schema.sql applied successfully.');
+    for (const file of migrationFiles) {
+      const filePath = path.join(migrationsDir, file);
+      const sql = fs.readFileSync(filePath, 'utf-8');
+      await query(sql);
+      console.log(`✅ Migration ${file} applied successfully.`);
+    }
 
     // Seed default mentor user if no user exists
     const existingUsers = await query('SELECT id FROM users LIMIT 1');

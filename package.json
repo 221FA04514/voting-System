@@ -4,7 +4,7 @@
   "description": "Clean, responsive full-stack web application powered by PostgreSQL for mentor-managed student creative image voting sessions.",
   "main": "server/index.js",
   "scripts": {
-    "server": "node server/index.js",
+    "server": "node --watch server/index.js",
     "client": "vite client --config client/vite.config.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "vite build client --config client/vite.config.js",

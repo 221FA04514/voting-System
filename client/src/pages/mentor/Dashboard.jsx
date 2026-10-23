@@ -22,7 +22,10 @@ import {
   Eye,
   Gamepad2,
   Share2,
-  Code2
+  Code2,
+  Box,
+  Cpu,
+  FileText
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -107,6 +110,18 @@ export default function Dashboard() {
     setToast({ message: 'Pattern Arena link copied to clipboard!', type: 'success' });
   };
 
+  const copyArrayArenaLink = () => {
+    const arrayUrl = `${window.location.origin}/student/array-arena`;
+    navigator.clipboard.writeText(arrayUrl);
+    setToast({ message: 'Array Arena link copied to clipboard!', type: 'success' });
+  };
+
+  const copyFunctionArenaLink = () => {
+    const funcUrl = `${window.location.origin}/student/function-arena`;
+    navigator.clipboard.writeText(funcUrl);
+    setToast({ message: 'Function Arena link copied to clipboard!', type: 'success' });
+  };
+
   // Metrics
   const activeSessionsCount = sessions.filter(s => s.status === 'open').length;
   const closedSessionsCount = sessions.filter(s => s.status === 'closed').length;
@@ -142,6 +157,86 @@ export default function Dashboard() {
         <StatCard title="Closed Sessions" value={closedSessionsCount} subtitle="Completed voting rounds" icon={CheckCircle} color="#64748b" />
         <StatCard title="Total Students" value={totalEligible} subtitle="Eligible across sessions" icon={Users} color="#4f46e5" />
         <StatCard title="Total Votes Cast" value={totalVotesCast} subtitle="Submitted image votes" icon={Vote} color="#f59e0b" />
+      </div>
+
+      {/* EXAM ARENA Highlight Banner */}
+      <div className="card" style={{
+        padding: '1.5rem',
+        marginBottom: '2rem',
+        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)',
+        color: '#ffffff',
+        borderRadius: '16px',
+        border: '1px solid #4338ca',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1.25rem',
+        boxShadow: '0 10px 25px -5px rgba(67, 56, 202, 0.3)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flex: 1, minWidth: '300px' }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '14px',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
+            flexShrink: 0
+          }}>
+            <FileText size={30} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+              <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '0.15rem 0.5rem', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 700 }}>
+                EXAM ARENA
+              </span>
+              <span style={{ backgroundColor: '#10b981', color: '#ffffff', padding: '0.15rem 0.5rem', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800 }}>
+                ACTIVE MODULE
+              </span>
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+              Online Examination & MCQ Assessment Platform
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: '#c7d2fe', margin: '0.25rem 0 0 0' }}>
+              Create exams, paste dozens of MCQs/fill-in questions, share secure student links, and monitor live submissions.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Link
+            to="/admin/exams"
+            className="btn"
+            style={{
+              backgroundColor: '#10b981',
+              color: '#ffffff',
+              fontWeight: 800,
+              padding: '0.7rem 1.25rem',
+              borderRadius: '10px',
+              textDecoration: 'none',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)'
+            }}
+          >
+            Open Exam Arena Hub
+          </Link>
+          <Link
+            to="/admin/exams/create"
+            className="btn btn-secondary"
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              color: '#ffffff',
+              borderColor: 'rgba(255,255,255,0.3)',
+              padding: '0.7rem 1rem',
+              textDecoration: 'none'
+            }}
+          >
+            + Create Exam
+          </Link>
+        </div>
       </div>
 
       {/* Student Activity & Game Share Section */}
@@ -196,6 +291,62 @@ export default function Dashboard() {
           <a href={`${window.location.origin}/student/pattern-arena`} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: 'rgba(255,255,255,0.1)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}>
             <ExternalLink size={16} />
             <span>Open Pattern Arena</span>
+          </a>
+        </div>
+      </div>
+
+      {/* Array Arena Student Module Card */}
+      <div className="card" style={{ padding: '1.25rem 1.5rem', marginBottom: '2.5rem', background: 'linear-gradient(135deg, #0f172a 0%, #0369a1 100%)', color: '#ffffff', border: '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '280px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(56, 189, 248, 0.3)' }}>
+            <Box size={26} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              🧠 ARRAY ARENA — Interactive C Array Memory Simulator
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginTop: '0.2rem' }}>
+              Teach B.Tech first-years array indexing, reads, writes, sums, max, and out-of-bounds safety visually!
+            </p>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button onClick={copyArrayArenaLink} className="btn btn-primary" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: '#0284c7' }}>
+            <Share2 size={16} />
+            <span>Copy Arena Link</span>
+          </button>
+          <a href={`${window.location.origin}/student/array-arena`} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: 'rgba(255,255,255,0.1)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <ExternalLink size={16} />
+            <span>Open Array Arena</span>
+          </a>
+        </div>
+      </div>
+
+      {/* Function Arena Student Module Card */}
+      <div className="card" style={{ padding: '1.25rem 1.5rem', marginBottom: '2.5rem', background: 'linear-gradient(135deg, #0f172a 0%, #6d28d9 100%)', color: '#ffffff', border: '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '280px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(167, 139, 250, 0.3)' }}>
+            <Cpu size={26} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              ⚙️ FUNCTION ARENA — Interactive C Function Simulator
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: '#e9d5ff', marginTop: '0.2rem' }}>
+              Teach B.Tech first-years function calls, arguments, parameters, call stack, return values, pass-by-value, and recursion visually!
+            </p>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button onClick={copyFunctionArenaLink} className="btn btn-primary" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: '#7c3aed' }}>
+            <Share2 size={16} />
+            <span>Copy Arena Link</span>
+          </button>
+          <a href={`${window.location.origin}/student/function-arena`} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', gap: '0.4rem', background: 'rgba(255,255,255,0.1)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <ExternalLink size={16} />
+            <span>Open Function Arena</span>
           </a>
         </div>
       </div>

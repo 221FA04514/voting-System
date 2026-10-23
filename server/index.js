@@ -9,6 +9,8 @@ const authRoutes = require('./routes/auth.routes');
 const sessionRoutes = require('./routes/session.routes');
 const voteRoutes = require('./routes/vote.routes');
 const exportRoutes = require('./routes/export.routes');
+const examRoutes = require('./routes/exam.routes');
+const examPortalRoutes = require('./routes/examPortal.routes');
 const { migrate } = require('./db/migrate');
 const { seed } = require('./db/seed');
 
@@ -49,6 +51,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/vote', voteRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/exams', examRoutes);
+app.use('/api/exam-portal', examPortalRoutes);
 
 // Serve static frontend in production if built
 const clientDistDir = path.join(__dirname, '..', 'client', 'dist');

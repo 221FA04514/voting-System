@@ -1,12 +1,17 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Vote, LayoutDashboard, PlusCircle, LogOut, Settings, Award } from 'lucide-react';
+import { Vote, LayoutDashboard, PlusCircle, LogOut, Settings, Award, FileText } from 'lucide-react';
 
 export default function Navbar() {
   const { mentor, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // If student is taking an exam, don't display global navigation bar
+  if (location.pathname.startsWith('/exam/')) {
+    return null;
+  }
 
   const isStudentPage = location.pathname.startsWith('/vote/') || location.pathname.startsWith('/game/') || location.pathname.startsWith('/student/');
 
@@ -64,6 +69,10 @@ export default function Navbar() {
               <Link to="/mentor/dashboard" className={`btn ${location.pathname === '/mentor/dashboard' ? 'btn-primary' : 'btn-secondary'}`}>
                 <LayoutDashboard size={18} />
                 <span>Dashboard</span>
+              </Link>
+              <Link to="/admin/exams" className={`btn ${location.pathname.startsWith('/admin/exams') ? 'btn-primary' : 'btn-secondary'}`} style={{ backgroundColor: location.pathname.startsWith('/admin/exams') ? '#4f46e5' : '#e0e7ff', color: location.pathname.startsWith('/admin/exams') ? '#ffffff' : '#3730a3' }}>
+                <FileText size={18} />
+                <span>Exam Arena</span>
               </Link>
               <Link to="/mentor/create-session" className={`btn ${location.pathname === '/mentor/create-session' ? 'btn-primary' : 'btn-secondary'}`}>
                 <PlusCircle size={18} />
