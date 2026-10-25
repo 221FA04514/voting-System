@@ -122,12 +122,14 @@ Marks: 2
     const hasLeak = studentQRes.rows.some(q => q.correct_answer || q.accepted_answers_json);
     assert(!hasLeak, 'SECURITY INVARIANT: Correct answers and answer keys are NEVER sent to the student before submission');
 
-    // 7. Registration Number Validation
-    const regPattern = /^261FA0\d{4}$/i;
+    // 7. Registration Number Validation (supports alphanumeric 261FA04XXXX)
+    const regPattern = /^261FA0[A-Z0-9]{4,5}$/i;
     assert(!regPattern.test('261FA0999'), 'Short reg number rejected');
-    assert(!regPattern.test('261FA012345'), 'Overlong reg number rejected');
+    assert(!regPattern.test('261FA01234567'), 'Overlong reg number rejected');
     assert(!regPattern.test('INVALID_REG'), 'Arbitrary text rejected');
     assert(regPattern.test(studentRegNo), `Valid 261FA0XXXX registration number (${studentRegNo}) accepted`);
+    assert(regPattern.test('261FA04514'), 'Valid registration number 261FA04514 accepted');
+    assert(regPattern.test('261FA04A12'), 'Alphanumeric registration number 261FA04A12 with letter accepted');
 
     // 8. Start Student Attempt
     const attemptId = `att_e2e_${testSuffix}`;

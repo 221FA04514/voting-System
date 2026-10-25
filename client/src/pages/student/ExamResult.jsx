@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Toast from '../../components/Toast';
+import QuestionContent from '../../components/QuestionContent';
 import { 
   Award, 
   CheckCircle, 
@@ -263,9 +264,7 @@ export default function ExamResult() {
                         </span>
                       </div>
 
-                      <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, fontSize: '0.9rem', color: '#0f172a' }}>
-                        {q.questionText}
-                      </p>
+                      <QuestionContent text={q.questionText} compact />
 
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem' }}>
                         <div style={{ padding: '0.4rem 0.6rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>

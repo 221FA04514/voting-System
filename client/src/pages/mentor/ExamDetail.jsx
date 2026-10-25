@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../api/client';
 import Toast from '../../components/Toast';
 import Modal from '../../components/Modal';
+import QuestionContent from '../../components/QuestionContent';
 import { 
   ArrowLeft, 
   PlusCircle, 
@@ -567,9 +568,7 @@ export default function ExamDetail() {
                       </div>
                     </div>
 
-                    <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>
-                      {q.question_text}
-                    </p>
+                    <QuestionContent text={q.question_text} compact />
 
                     {/* Options or Answer */}
                     {isMcq ? (

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { apiFetch } from '../../api/client';
 import Toast from '../../components/Toast';
 import Modal from '../../components/Modal';
+import QuestionContent from '../../components/QuestionContent';
 import { 
   ArrowLeft, 
   Download, 
@@ -646,9 +647,7 @@ export default function ExamResults() {
                       </span>
                     </div>
 
-                    <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, fontSize: '0.85rem', color: '#1e293b' }}>
-                      {q.question_text}
-                    </p>
+                    <QuestionContent text={q.question_text} compact />
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem' }}>
                       <div style={{ padding: '0.4rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>

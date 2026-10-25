@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Toast from '../../components/Toast';
 import Modal from '../../components/Modal';
+import QuestionContent from '../../components/QuestionContent';
 import { 
   Clock, 
   CheckCircle, 
@@ -480,16 +481,8 @@ export default function TakeExam() {
               </div>
             </div>
 
-            {/* Question Text */}
-            <h2 style={{
-              fontSize: '1.15rem',
-              fontWeight: 700,
-              color: '#0f172a',
-              lineHeight: 1.6,
-              margin: '0 0 1.75rem 0'
-            }}>
-              {currentQ.questionText}
-            </h2>
+            {/* Question Text & Code Snippet */}
+            <QuestionContent text={currentQ.questionText} />
 
             {/* Question Input Area */}
             {currentQ.questionType === 'mcq' ? (

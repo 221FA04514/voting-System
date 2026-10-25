@@ -16,7 +16,7 @@ import {
   Lock
 } from 'lucide-react';
 
-const REG_REGEX = /^261FA0\d{4}$/i;
+const REG_REGEX = /^261FA0[A-Z0-9]{4,5}$/i;
 
 export default function ExamLanding() {
   const { publicId } = useParams();
@@ -67,7 +67,7 @@ export default function ExamLanding() {
 
     if (!REG_REGEX.test(cleanReg)) {
       setToast({
-        message: 'Invalid Registration Number. Expected format is 261FA0XXXX (e.g. 261FA01025)',
+        message: 'Invalid Registration Number. Expected format is 261FA04XXXX (e.g. 261FA04514, 261FA04A12)',
         type: 'error'
       });
       return;
@@ -272,7 +272,7 @@ export default function ExamLanding() {
               Student Identity Verification
             </h3>
             <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0 0 1.25rem 0' }}>
-              Enter your official Vignan registration number (Format: <strong>261FA0XXXX</strong>).
+              Enter your official Vignan registration number (Format: <strong>261FA04XXXX</strong>).
             </p>
 
             <form onSubmit={handleVerify}>
@@ -288,8 +288,8 @@ export default function ExamLanding() {
                       setRegistrationNumber(e.target.value.toUpperCase());
                       setVerifyStatus(null);
                     }}
-                    placeholder="261FA01025"
-                    maxLength={10}
+                    placeholder="261FA04514"
+                    maxLength={12}
                     required
                     style={{
                       width: '100%',
@@ -305,7 +305,7 @@ export default function ExamLanding() {
                   />
                   {registrationNumber && !isRegValid && (
                     <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
-                      Format must be 261FA0 followed by 4 digits (e.g., 261FA01025)
+                      Format must be 261FA04XXXX (alphabets & digits, e.g., 261FA04514, 261FA04A12)
                     </span>
                   )}
                 </div>

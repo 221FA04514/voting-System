@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiFetch } from '../../api/client';
 import Toast from '../../components/Toast';
+import QuestionContent from '../../components/QuestionContent';
 import { 
   FileText, 
   ArrowLeft, 
@@ -151,62 +152,99 @@ export default function CreateExam() {
 
       blocks.forEach((block, idx) => {
         const qNum = idx + 1;
-        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-        if (lines.length === 0) return;
+        const rawLines = block.split('\n');
+        if (rawLines.length === 0 || !rawLines.some(l => l.trim())) return;
 
         let qType = 'mcq';
-        let qText = '';
+        const questionLines = [];
         const options = [];
         let correctAnswer = '';
         let acceptedAnswers = [];
         let marks = 1;
 
         // Check for TYPE:
-        const typeLine = lines.find(l => /^TYPE:\s*/i.test(l) || /Type:\s*fill/i.test(l));
-        if (typeLine && /fill/i.test(typeLine)) {
+        const typeLine = rawLines.find(l => /^TYPE:\s*/i.test(l.trim()) || /^Type:\s*fill/i.test(l.trim()));
+        if (typeLine && /fill/i.test(typeLine.trim())) {
           qType = 'fill_blank';
-        } else if (lines.some(l => /fill/i.test(l) && !/^[A-D][\.\:\)]/i.test(l))) {
+        } else if (rawLines.some(l => /fill/i.test(l.trim()) && !/^[A-D][\.\:\)]/i.test(l.trim()) && !l.toLowerCase().includes('printf'))) {
           qType = 'fill_blank';
         }
 
-        // Question text
-        const qLine = lines.find(l => /^(?:Q:|Question:|\d+[\.\)])\s*/i.test(l));
-        if (qLine) {
-          qText = qLine.replace(/^(?:Q:|Question:|\d+[\.\)])\s*/i, '').trim();
-        } else {
-          // First line that is not TYPE:
-          const firstNonType = lines.find(l => !/^TYPE:/i.test(l));
-          if (firstNonType) qText = firstNonType.trim();
-        }
+        let inOptions = false;
+        let afterOptions = false;
 
-        // Options for MCQ
-        lines.forEach(l => {
-          const optMatch = l.match(/^([A-D])[\.\:\)]\s+(.*)/i);
-          if (optMatch) {
-            options.push({ letter: optMatch[1].toUpperCase(), text: optMatch[2].trim() });
+        for (const line of rawLines) {
+          const trimmed = line.trim();
+
+          if (/^TYPE:\s*/i.test(trimmed) || /^Type:\s*fill/i.test(trimmed)) {
+            continue;
           }
-        });
 
-        // Answer
-        const ansLine = lines.find(l => /^(?:ANSWER|Ans|Correct):\s*/i.test(l));
-        if (ansLine) {
-          correctAnswer = ansLine.replace(/^(?:ANSWER|Ans|Correct):\s*/i, '').trim();
+          const optionMatch = trimmed.match(/^(?:([A-D])[\.\:\)]|\(([A-D])\)|\[([A-D])\])\s*(.*)/i);
+          const ansMatch = trimmed.match(/^(?:ANSWER|Ans|Correct):\s*(.*)/i);
+          const marksMatch = trimmed.match(/^MARKS?:\s*(.*)/i);
+          const accMatch = trimmed.match(/^ACCEPTED:\s*(.*)/i);
+
+          if (ansMatch) {
+            afterOptions = true;
+            inOptions = false;
+            correctAnswer = ansMatch[1].trim();
+            continue;
+          }
+
+          if (marksMatch) {
+            const num = parseFloat(marksMatch[1].trim());
+            if (!isNaN(num) && num > 0) marks = num;
+            continue;
+          }
+
+          if (accMatch) {
+            accMatch[1].split(/[;,|]/).forEach(s => {
+              if (s.trim()) acceptedAnswers.push(s.trim());
+            });
+            continue;
+          }
+
+          if (!inOptions && !afterOptions) {
+            if (optionMatch) {
+              inOptions = true;
+              options.push({ letter: (optionMatch[1] || optionMatch[2] || optionMatch[3]).toUpperCase(), text: optionMatch[4].trim() });
+              continue;
+            }
+
+            const qPromptMatch = trimmed.match(/^(?:Q\d*|Question\s*\d*)\s*[:\.\)]\s*(.*)/i) || trimmed.match(/^\d+[\.\)]\s+(.*)/);
+            if (qPromptMatch && questionLines.length === 0) {
+              if (qPromptMatch[1].trim()) questionLines.push(qPromptMatch[1].trim());
+              continue;
+            }
+
+            if (/^(?:CODE|SNIPPET):\s*(.*)/i.test(trimmed)) {
+              const rest = trimmed.replace(/^(?:CODE|SNIPPET):\s*/i, '');
+              if (rest) questionLines.push(rest);
+              continue;
+            }
+
+            if (questionLines.length === 0) {
+              if (trimmed) questionLines.push(trimmed);
+            } else {
+              questionLines.push(line);
+            }
+            continue;
+          }
+
+          if (inOptions) {
+            if (optionMatch) {
+              options.push({ letter: (optionMatch[1] || optionMatch[2] || optionMatch[3]).toUpperCase(), text: optionMatch[4].trim() });
+              continue;
+            }
+            if (options.length > 0 && trimmed) {
+              options[options.length - 1].text += ' ' + trimmed;
+            }
+            continue;
+          }
         }
 
-        // Accepted answers for fill in the blank
-        const accLine = lines.find(l => /^ACCEPTED:\s*/i.test(l));
-        if (accLine) {
-          acceptedAnswers = accLine.replace(/^ACCEPTED:\s*/i, '').split(/[;,|]/).map(s => s.trim()).filter(Boolean);
-        } else if (correctAnswer) {
-          acceptedAnswers = [correctAnswer];
-        }
-
-        // Marks
-        const marksLine = lines.find(l => /^MARKS:\s*/i.test(l) || /^Marks:\s*/i.test(l));
-        if (marksLine) {
-          const num = parseFloat(marksLine.replace(/^(?:MARKS|Marks):\s*/i, ''));
-          if (!isNaN(num) && num > 0) marks = num;
-        }
+        const qText = questionLines.join('\n').trim();
 
         // Validate
         if (!qText) {
@@ -237,8 +275,8 @@ export default function CreateExam() {
               type: 'fill_blank',
               text: qText,
               options: [],
-              correctAnswer,
-              acceptedAnswers,
+              correctAnswer: correctAnswer || (acceptedAnswers[0] || ''),
+              acceptedAnswers: acceptedAnswers.length > 0 ? acceptedAnswers : [correctAnswer],
               marks
             });
           }
@@ -841,9 +879,7 @@ export default function CreateExam() {
                           {q.marks} Marks
                         </span>
                       </div>
-                      <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>
-                        {q.text}
-                      </p>
+                      <QuestionContent text={q.text} compact />
 
                       {/* Options */}
                       {q.type === 'mcq' && (

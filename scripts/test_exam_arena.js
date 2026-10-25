@@ -123,12 +123,14 @@ Marks: 2
     const pubRes = await query("UPDATE exams SET status = 'published', published_at = NOW() WHERE id = $1 RETURNING *", [examId]);
     assert(pubRes.rows[0].status === 'published', 'Exam transitioned from draft to published');
 
-    // 6. Test Registration Number Validation Rules
-    const regRegex = /^261FA0\d{4}$/i;
+    // 6. Test Registration Number Validation Rules (supports alphanumeric 261FA04XXXX)
+    const regRegex = /^261FA0[A-Z0-9]{4,5}$/i;
     assert(regRegex.test('261FA01025'), 'Valid registration number 261FA01025 matches');
     assert(regRegex.test('261fa09999'), 'Case-insensitive registration number 261fa09999 matches');
+    assert(regRegex.test('261FA04514'), 'Valid registration number 261FA04514 matches');
+    assert(regRegex.test('261FA04A12'), 'Alphanumeric registration number 261FA04A12 matches');
     assert(!regRegex.test('261FA0123'), 'Short registration number 261FA0123 rejected');
-    assert(!regRegex.test('261FA012345'), 'Long registration number 261FA012345 rejected');
+    assert(!regRegex.test('261FA01234567'), 'Long registration number 261FA01234567 rejected');
     assert(!regRegex.test('23A001'), 'Old/other format 23A001 rejected for 261FA0XXXX');
     assert(!regRegex.test('DROP TABLE'), 'SQL injection registration string rejected');
 

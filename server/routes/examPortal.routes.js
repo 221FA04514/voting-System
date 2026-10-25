@@ -3,8 +3,8 @@ const router = express.Router();
 const crypto = require('crypto');
 const { query, getClient } = require('../config/db');
 
-// Registration Number Regex: 261FA0XXXX (exact format, 4 digits)
-const REG_NO_REGEX = /^261FA0\d{4}$/i;
+// Registration Number Regex: 261FA04XXXX or 261FA0XXXX (alphanumeric, allowing letters and digits in XXXX)
+const REG_NO_REGEX = /^261FA0[A-Z0-9]{4,5}$/i;
 
 // Helper to look up exam by public_id
 async function getExamByPublicId(publicId) {
@@ -109,11 +109,11 @@ router.post('/:publicId/verify', async (req, res) => {
 
     const normalizedReg = registrationNumber.trim().toUpperCase();
 
-    // Validate registration number format: 261FA0XXXX
+    // Validate registration number format: 261FA04XXXX (alphanumeric)
     if (!REG_NO_REGEX.test(normalizedReg)) {
       return res.status(400).json({
         eligible: false,
-        error: 'Invalid Registration Number. Format must be 261FA0XXXX (e.g., 261FA01025).'
+        error: 'Invalid Registration Number. Format must be 261FA04XXXX (alphabets & numbers allowed, e.g., 261FA04514, 261FA04A12).'
       });
     }
 
@@ -206,7 +206,7 @@ router.post('/:publicId/start', async (req, res) => {
     const normalizedReg = registrationNumber.trim().toUpperCase();
     if (!REG_NO_REGEX.test(normalizedReg)) {
       client.release();
-      return res.status(400).json({ error: 'Invalid registration number format. Expected 261FA0XXXX.' });
+      return res.status(400).json({ error: 'Invalid registration number format. Expected 261FA04XXXX.' });
     }
 
     // Check roster if required

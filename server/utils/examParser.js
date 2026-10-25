@@ -1,7 +1,10 @@
 /**
  * Bulk Question Import Parser for Exam Arena
- * Supports Format A (Tagged: TYPE, Q, A, B, C, D, ANSWER, MARKS)
- * and Format B (Numbered: 1. Question, A. opt, Answer: X, Marks: Y)
+ * Supports:
+ * - Format A (Tagged: TYPE, Q, A, B, C, D, ANSWER, MARKS)
+ * - Format B (Numbered: 1. Question, A. opt, Answer: X, Marks: Y)
+ * - Multi-line questions containing C programming code snippets (between Q and options)
+ * - Code formatting preservation (indentation, braces, line breaks)
  */
 
 function parseBulkQuestions(rawText, defaultMarks = 1) {
@@ -21,18 +24,18 @@ function parseBulkQuestions(rawText, defaultMarks = 1) {
   // Normalize line breaks
   const text = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
 
-  // Determine splitting strategy: split by blank lines or explicit question starters (Numbered or TYPE: ... \n Q:)
+  // Split by blank lines or explicit question starters (Numbered or TYPE: ... \n Q:)
   const blocks = text.split(/\n\s*\n+|\n+(?=\d+[\.\)]\s+)|\n+(?=TYPE:\s*(?:MCQ|FILL)\s*\n\s*Q:)/i)
     .map(b => b.trim())
     .filter(Boolean);
 
   blocks.forEach((blockText, blockIdx) => {
     const qNum = blockIdx + 1;
-    const blockLines = blockText.split('\n').map(l => l.trim()).filter(Boolean);
-    if (blockLines.length === 0) return;
+    const rawLines = blockText.split('\n');
+    if (rawLines.length === 0 || !rawLines.some(l => l.trim())) return;
 
     let qType = 'mcq';
-    let qText = '';
+    const questionLines = [];
     const options = [];
     let correctAnswer = '';
     const acceptedAnswers = [];
@@ -40,69 +43,141 @@ function parseBulkQuestions(rawText, defaultMarks = 1) {
     let explanation = '';
 
     // Check for explicit TYPE: in block
-    const typeLine = blockLines.find(l => /^TYPE:\s*/i.test(l) || /Type:\s*fill/i.test(l));
+    const typeLine = rawLines.find(l => /^TYPE:\s*/i.test(l.trim()) || /^Type:\s*fill/i.test(l.trim()));
     if (typeLine) {
-      if (/fill/i.test(typeLine)) {
+      if (/fill/i.test(typeLine.trim())) {
         qType = 'fill_blank';
       } else {
         qType = 'mcq';
       }
-    } else if (blockLines.some(l => /fill/i.test(l) && !/^[A-D][\.\:\)]/i.test(l) && !l.toLowerCase().includes('printf'))) {
-      const flLine = blockLines.find(l => /fill/i.test(l));
+    } else if (rawLines.some(l => /fill/i.test(l.trim()) && !/^[A-D][\.\:\)]/i.test(l.trim()) && !l.toLowerCase().includes('printf'))) {
+      const flLine = rawLines.find(l => /fill/i.test(l.trim()));
       if (flLine && flLine.toLowerCase().includes('fill')) {
         qType = 'fill_blank';
       }
     }
 
-    // Parse each line in the block
-    for (const line of blockLines) {
-      if (/^TYPE:\s*/i.test(line)) {
+    let inOptions = false;
+    let afterOptions = false;
+
+    for (const line of rawLines) {
+      const trimmed = line.trim();
+
+      if (/^TYPE:\s*/i.test(trimmed)) {
         continue;
       }
 
-      // Check if line specifies Type: FILL inline
-      if (/^Type:\s*fill/i.test(line)) {
+      if (/^Type:\s*fill/i.test(trimmed)) {
         qType = 'fill_blank';
         continue;
       }
 
-      // Question line (Q: ... or 1. ... or 1) ...)
-      if (/^Q:\s*/i.test(line)) {
-        qText = line.replace(/^Q:\s*/i, '').trim();
-      } else if (/^\d+[\.\)]\s*/.test(line)) {
-        qText = line.replace(/^\d+[\.\)]\s*/, '').trim();
+      // Check Option pattern: A. or A: or A) or (A) or [A]
+      const optionMatch = trimmed.match(/^(?:([A-D])[\.\:\)]|\(([A-D])\)|\[([A-D])\])\s*(.*)/i);
+
+      // Check Answer pattern
+      const answerMatch = trimmed.match(/^(?:ANSWER|ANS|Correct Answer|Correct):\s*(.*)/i);
+
+      // Check Marks pattern
+      const marksMatch = trimmed.match(/^MARKS?:\s*(.*)/i);
+
+      // Check Accepted answers pattern
+      const acceptedMatch = trimmed.match(/^ACCEPTED:\s*(.*)/i);
+
+      // Check Explanation pattern
+      const explanationMatch = trimmed.match(/^EXPLANATION:\s*(.*)/i);
+
+      if (answerMatch) {
+        afterOptions = true;
+        inOptions = false;
+        correctAnswer = answerMatch[1].trim();
+        continue;
       }
-      // Options: A. or A: or A)
-      else if (/^[A-D][\.\:\)]\s*/i.test(line)) {
-        const optLetter = line[0].toUpperCase();
-        const optVal = line.replace(/^[A-D][\.\:\)]\s*/i, '').trim();
-        options.push({ letter: optLetter, text: optVal });
-      }
-      // Answer line: ANSWER: B or Answer: main
-      else if (/^(ANSWER|ANS):\s*/i.test(line)) {
-        correctAnswer = line.replace(/^(ANSWER|ANS):\s*/i, '').trim();
-      }
-      // Accepted answers line for fill in blank: ACCEPTED: printf;PRINTF;printf()
-      else if (/^ACCEPTED:\s*/i.test(line)) {
-        const accStr = line.replace(/^ACCEPTED:\s*/i, '').trim();
-        accStr.split(/[;,]/).forEach(a => {
-          if (a.trim()) acceptedAnswers.push(a.trim());
-        });
-      }
-      // Marks line: MARKS: 2 or Marks: 1
-      else if (/^MARKS:\s*/i.test(line)) {
-        const mVal = parseFloat(line.replace(/^MARKS:\s*/i, '').trim());
+
+      if (marksMatch) {
+        const mVal = parseFloat(marksMatch[1].trim());
         if (!isNaN(mVal) && mVal >= 0) {
           marks = mVal;
         }
+        continue;
       }
-      // Explanation line
-      else if (/^EXPLANATION:\s*/i.test(line)) {
-        explanation = line.replace(/^EXPLANATION:\s*/i, '').trim();
-      } else if (!qText && !line.includes(':')) {
-        qText = line;
+
+      if (acceptedMatch) {
+        acceptedMatch[1].split(/[;,|]/).forEach(a => {
+          if (a.trim()) acceptedAnswers.push(a.trim());
+        });
+        continue;
+      }
+
+      if (explanationMatch) {
+        afterOptions = true;
+        inOptions = false;
+        explanation = explanationMatch[1].trim();
+        continue;
+      }
+
+      // Before options:
+      if (!inOptions && !afterOptions) {
+        if (optionMatch) {
+          inOptions = true;
+          const letter = (optionMatch[1] || optionMatch[2] || optionMatch[3]).toUpperCase();
+          const optText = optionMatch[4].trim();
+          options.push({ letter, text: optText });
+          continue;
+        }
+
+        // Check if line starts the question prompt: Q: or 1.
+        const qPromptMatch = trimmed.match(/^(?:Q\d*|Question\s*\d*)\s*[:\.\)]\s*(.*)/i) ||
+                             trimmed.match(/^\d+[\.\)]\s+(.*)/);
+
+        if (qPromptMatch && questionLines.length === 0) {
+          const prompt = qPromptMatch[1].trim();
+          if (prompt) questionLines.push(prompt);
+          continue;
+        }
+
+        // Check CODE: or SNIPPET: marker
+        if (/^(?:CODE|SNIPPET):\s*(.*)/i.test(trimmed)) {
+          const rest = trimmed.replace(/^(?:CODE|SNIPPET):\s*/i, '');
+          if (rest) questionLines.push(rest);
+          continue;
+        }
+
+        // If questionLines is empty and this is the first non-tag line
+        if (questionLines.length === 0) {
+          if (trimmed) questionLines.push(trimmed);
+        } else {
+          // Keep original line (preserving code indentation)
+          questionLines.push(line);
+        }
+        continue;
+      }
+
+      // In options:
+      if (inOptions) {
+        if (optionMatch) {
+          const letter = (optionMatch[1] || optionMatch[2] || optionMatch[3]).toUpperCase();
+          const optText = optionMatch[4].trim();
+          options.push({ letter, text: optText });
+          continue;
+        }
+
+        // Continuation of previous option
+        if (options.length > 0 && trimmed) {
+          options[options.length - 1].text += ' ' + trimmed;
+        }
+        continue;
+      }
+
+      // After options:
+      if (afterOptions) {
+        if (explanation && trimmed) {
+          explanation += '\n' + trimmed;
+        }
       }
     }
+
+    const qText = questionLines.join('\n').trim();
 
     // Validation
     const blockErrors = [];
@@ -151,7 +226,7 @@ function parseBulkQuestions(rawText, defaultMarks = 1) {
         options: options.map(o => o.text), // Array of option strings
         optionLetters: options.map(o => o.letter),
         correctAnswer: qType === 'mcq' ? correctAnswer.trim().toUpperCase() : correctAnswer.trim(),
-        acceptedAnswers: acceptedAnswers.length > 0 ? acceptedAnswers : [correctAnswer.trim()],
+        acceptedAnswers: acceptedAnswers.length > 0 ? acceptedAnswers : (correctAnswer ? [correctAnswer.trim()] : []),
         marks: Number(marks) || 1,
         negativeMarks: 0,
         explanation
